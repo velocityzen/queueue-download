@@ -11,16 +11,13 @@ let Download = function(files, opts, cb) {
 
   this.force = opts.force;
   this.res = [];
-  let self = this;
   let error;
 
   let q = new Q(opts.concurrency)
     .bind(this)
-    .on('drain', function() {
-      cb(error, self.res);
-    })
-    .on('error', function(err) {
-      error = err;
+    .on('drain', () => cb(error, this.res))
+    .on('error', err => {
+      error = err
     });
 
   for (var i in files) {
@@ -32,16 +29,17 @@ let Download = function(files, opts, cb) {
 }
 
 Download.prototype.download = function(index, file, cb) {
-  let self = this;
   let fileStream = fsu.createWriteStreamUnique(file.local, { force: this.force });
 
   request(file.remote)
     .pipe(fileStream)
-    .on('finish', function() {
-      self.res[index] = {
-        id: file.id,
-        path: fileStream.path
-      };
+    .on('finish', () => {
+      this.res[index] = { path: fileStream.path };
+
+      if (file.id) {
+        this.res[index].id = file.id;
+      }
+
       cb();
     })
     .on('error', cb);

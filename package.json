@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/velocityzen/queueue-download#readme",
   "dependencies": {
-    "fsu": "^0.2.0",
+    "fsu": "^1.0.0",
     "queueue": "^1.0.0",
     "request": "^2.65.0"
   }
