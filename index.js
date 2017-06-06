@@ -1,9 +1,9 @@
 'use strict';
-let Q = require('queueue');
-let fsu = require('fsu');
-let request = require('request');
+const Q = require('queueue');
+const fsu = require('fsu');
+const got = require('got');
 
-let Download = function(files, opts, cb) {
+const Download = function(files, opts, cb) {
   if (!cb) {
     cb = opts;
     opts = {};
@@ -13,7 +13,7 @@ let Download = function(files, opts, cb) {
   this.res = [];
   let error;
 
-  let q = new Q(opts.concurrency)
+  const q = new Q(opts.concurrency)
     .bind(this)
     .on('drain', () => cb(error, this.res))
     .on('error', err => {
@@ -29,9 +29,10 @@ let Download = function(files, opts, cb) {
 }
 
 Download.prototype.download = function(index, file, cb) {
-  let fileStream = fsu.createWriteStreamUnique(file.local, { force: this.force });
+  const fileStream = fsu.createWriteStreamUnique(file.local, { force: this.force });
 
-  request(file.remote)
+  got
+    .stream(file.remote)
     .pipe(fileStream)
     .on('finish', () => {
       this.res[index] = { path: fileStream.path };
@@ -45,7 +46,7 @@ Download.prototype.download = function(index, file, cb) {
     .on('error', cb);
 };
 
-let download = function(files, opts, cb) {
+const download = function(files, opts, cb) {
   return new Download(files, opts, cb);
 };
 

@@ -7,7 +7,7 @@
 
 ## Usage
 ```js
-let download = require("queueue-download").download;
+let download = require('queueue-download').download;
 
 let files = [
   {
