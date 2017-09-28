@@ -14,18 +14,13 @@ const Download = function(files, opts, cb) {
   let error;
 
   const q = new Q(opts.concurrency)
-    .bind(this)
+    .bind(this, 'download')
     .on('drain', () => cb(error, this.res))
     .on('error', err => {
       error = err
     });
 
-  for (var i in files) {
-    q.push({
-      method: 'download',
-      args: [ i, files[i] ]
-    });
-  }
+  files.forEach((file, index) => q.push({ args: [ index, file ] }) );
 }
 
 Download.prototype.download = function(index, file, cb) {
