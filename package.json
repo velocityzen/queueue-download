@@ -26,6 +26,6 @@
   "dependencies": {
     "fsu": "^1.0.0",
     "got": "^7.0.0",
-    "queueue": "^1.0.0"
+    "queueue": "^1.1.0"
   }
 }
