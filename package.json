@@ -4,7 +4,7 @@
   "description": "File download queue with unique file names support",
   "main": "index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "nyc ava"
   },
   "repository": {
     "type": "git",
@@ -24,8 +24,13 @@
   },
   "homepage": "https://github.com/velocityzen/queueue-download#readme",
   "dependencies": {
-    "fsu": "^1.0.0",
-    "got": "^7.0.0",
+    "fsu": "^2.0.0",
+    "got": "^9.6.0",
     "queueue": "^1.1.0"
+  },
+  "devDependencies": {
+    "ava": "^2.2.0",
+    "del": "^5.0.0",
+    "nyc": "^14.1.1"
   }
 }

@@ -11,7 +11,7 @@
 
 ## Usage
 ```js
-const download = require('queueue-download').download;
+const download = require('queueue-download');
 
 const files = [
   {
@@ -24,14 +24,13 @@ const files = [
   }
 ];
 
-download(files, (err, res) => {
-  //res is an array of {path: 'filepath', error: 'error if occurred'}
-  console.log(err, res);
-});
+const res = await download(files);
 ```
 
 ### Options
-#### download(files, opts, cb);
+#### async download(files, opts);
+
+Returns an array with results. It never throws an error, all errors are in the result array.
 
 * force — force path creation
 * concurrency — number of simultaneous downloads, 'auto' or undefined are equals to cpus number

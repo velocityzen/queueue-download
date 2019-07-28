@@ -3,49 +3,50 @@ const Q = require('queueue');
 const fsu = require('fsu');
 const got = require('got');
 
-const Download = function(files, opts, cb) {
-  if (!cb) {
-    cb = opts;
-    opts = {};
+function createResult(file, data) {
+  const res = {
+    ...data
   }
 
-  this.force = opts.force;
-  this.res = [];
-  let error;
+  if (file.id) {
+    res.id = file.id
+  }
 
-  const q = new Q(opts.concurrency)
-    .bind(this, 'download')
-    .on('drain', () => cb(error, this.res))
-    .on('error', err => {
-      error = err
-    });
-
-  files.forEach((file, index) => q.push({ args: [ index, file ] }) );
+  return res;
 }
 
-Download.prototype.download = function(index, file, cb) {
-  const fileStream = fsu.createWriteStreamUnique(file.local, { force: this.force });
+function downloadFile(result, index, file, force) {
+  return new Promise(resolve => {
+    const fileStream = fsu.createWriteStreamUnique(file.local, { force });
 
-  got
-    .stream(file.remote)
-    .pipe(fileStream)
-    .on('finish', () => {
-      this.res[index] = { path: fileStream.path };
-
-      if (file.id) {
-        this.res[index].id = file.id;
-      }
-
-      cb();
+    got(file.remote, {
+      stream: true
     })
-    .on('error', cb);
-};
+      .on('error', error => {
+        result[index] = createResult(file, { error });
+        resolve();
+      })
+      .pipe(fileStream)
+      .on('finish', () => {
+        result[index] = createResult(file, { path: fileStream.path });
+        resolve();
+      })
+      .on('error', error => {
+        result[index] = createResult(file, { error });
+        resolve();
+      });
+  });
+}
 
-const download = function(files, opts, cb) {
-  return new Download(files, opts, cb);
-};
+function download(files, opts = {}) {
+  return new Promise(resolve => {
+    const result = [];
+    const q = new Q(opts.concurrency)
+      .bind(null, downloadFile)
+      .on('drain', () => resolve(result));
 
-module.exports = {
-  Download,
-  download
-};
+    files.forEach((file, index) => q.push({ args: [ result, index, file, opts.force ] }));
+  });
+}
+
+module.exports = download;
